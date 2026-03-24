@@ -1,37 +1,39 @@
-# SRA - Scheduler Risk Analysis
+# Schedule Risk
 
-Dashboard analisis risiko jadwal berbasis Monte Carlo untuk planner dan risk analyst. Aplikasi ini berjalan sepenuhnya di browser, menyimpan workspace secara lokal, dan cocok untuk hosting statis seperti Cloudflare Pages.
+Schedule Risk adalah aplikasi analisis risiko jadwal berbasis Monte Carlo untuk planner, scheduler, dan risk analyst. Aplikasi ini berjalan sepenuhnya di browser, menyimpan workspace secara lokal, dan cocok untuk hosting statis seperti Cloudflare Pages.
 
-## Ringkasan fitur
+## Highlights
 
 - Workflow terpandu `Input -> Run -> Results -> Insights`
-- Workspace local-first: multi-project, multi-scenario, recent projects
+- Workspace local-first untuk multi-project dan multi-scenario
 - Simulasi Monte Carlo dengan distribusi triangular
-- Compare scenario untuk `P50`, `P80`, `P90`, contingency, dan risk driver
-- Export `CSV`, `PNG`, dan `PDF`
+- Compare scenario untuk `P50`, `P80`, `P90`, contingency, dan pergeseran risk driver
+- Export hasil ke `CSV`, `PNG`, dan `PDF`
 - CSV import, template download, dan preset proyek
 - Validation assistant dengan jump-to-row, dismiss, dan auto-fix dasar
 - Mitigation register per aktivitas
-- Dependency ringan `FS/SS`, lag, mode `plan risk` / `remaining risk`
-- Calendar setup dengan `5/6/7` hari kerja dan holiday override sederhana
+- Calendar setup dengan `5/6/7` hari kerja, holiday dates, dan holiday override
+- UI bilingual `Indonesia / English`
 
-## Tech stack
+## Tech Stack
 
 - React
 - Vite
 - Recharts
 - jsPDF
 - html-to-image
-- Vitest + Testing Library + axe
+- Vitest
+- Testing Library
+- axe
 
-## Menjalankan lokal
+## Local Development
 
 Prasyarat:
 
 - Node.js 18+
 - npm 9+
 
-Command:
+Install dan jalankan:
 
 ```bash
 npm install
@@ -45,15 +47,15 @@ npm run build
 npm run preview
 ```
 
-Test:
+Jalankan test:
 
 ```bash
 npm test
 ```
 
-## Deploy ke Cloudflare Pages via Wrangler
+## Deploy ke Cloudflare Pages
 
-Project ini sudah disiapkan untuk direct upload ke Cloudflare Pages.
+Project ini sudah disiapkan untuk direct upload ke Cloudflare Pages via Wrangler.
 
 ```bash
 npm run cf:login
@@ -62,77 +64,67 @@ npm run build
 npm run cf:deploy
 ```
 
-Preview branch:
+Untuk preview branch:
 
 ```bash
 npm run build
 npm run cf:deploy:staging
 ```
 
-Konfigurasi deploy ada di [wrangler.toml](/E:/Project/sra-app/sra-app/wrangler.toml).
+Lihat konfigurasi di [wrangler.toml](./wrangler.toml).
 
-## Struktur penting
+## Struktur Proyek
 
 ```text
 src/
-  App.jsx                     Shell utama workflow, persistence, compare, export
-  App.css                     Theme dan layout dashboard
+  App.jsx
+  App.css
   components/
-    Header.jsx                Hero, stepper, run controls
-    WorkspacePanel.jsx        Project/scenario workspace + calendar setup
-    InputTab.jsx              Tabel aktivitas, import, preset, validation assistant
-    ResultsTab.jsx            Executive summary, critical path, mitigation readiness
-    ChartsTab.jsx             Histogram dan S-curve
-    SensitivityTab.jsx        Tornado chart, risk table, mitigation context
-    CompareSection.jsx        Perbandingan 2 scenario
+    Header.jsx
+    WorkspacePanel.jsx
+    InputTab.jsx
+    ResultsTab.jsx
+    ChartsTab.jsx
+    SensitivityTab.jsx
+    CompareSection.jsx
+  hooks/
+    useWorkspaceModel.js
+    useWorkspaceActions.js
+    useScenarioRunState.js
+    useSimulationActions.js
+    useStageNavigation.js
   utils/
-    simulation.js             Engine Monte Carlo, diagnostics, dependency summary
-    workspace.js              Model workspace dan local storage
-    import.js                 CSV import + template
-    compare.js                Delta compare scenario
-    report.js                 Export PNG/PDF
-    templates.js              Preset template proyek
+    simulation.js
+    workspace.js
+    import.js
+    compare.js
+    report.js
+    templates.js
 ```
 
-## Model data saat ini
+## Data Model Ringkas
 
-Workspace menyimpan:
+- `Project`: metadata project, `calendarConfig`, kumpulan `scenarios`
+- `Scenario`: iterations, activities, notes, dan `lastRunSummary`
+- `Activity`: O/M/P, dependency, lag, progress, remaining duration, dan mitigation fields
 
-- `Project`
-  - `id`, `name`, `createdAt`, `updatedAt`, `notes`
-  - `calendarConfig`
-  - `scenarios`
-- `Scenario`
-  - `id`, `name`, `createdAt`, `updatedAt`
-  - `iterations`, `activities`, `notes`, `lastRunSummary`
-- `Activity`
-  - O/M/P
-  - predecessor tunggal
-  - `dependencyType`, `lag`
-  - `progressPercent`, `remainingDuration`, `actualStart`
-  - mitigation fields
-
-## Catatan modeling
+## Catatan Modeling
 
 - Dependency yang didukung saat ini: `FS` dan `SS`
-- Holiday override saat ini diperlakukan sebagai allowance global: setiap baris override menambah 1 hari ke total durasi proyek
-- Belum ada scheduling berbasis tanggal kalender penuh atau CPM editor
-- Tidak ada backend; semua data tersimpan di browser user
+- Holiday override masih diperlakukan sebagai allowance global
+- Belum ada CPM editor atau scheduling kalender penuh
+- Tidak ada backend; data tersimpan di browser user
 
-## Quality gates
-
-Baseline saat ini:
+## Quality Status
 
 - `npm test` lulus
 - `npm run build` lulus
-- Audit accessibility otomatis lewat `axe` sudah aktif di test suite
-- Bundle chart tetap lazy-loaded agar initial load ringan
+- Accessibility check otomatis via `axe`
+- Results, compare, charts, sensitivity, dan report diekstrak ke lazy-loaded chunks
 
-## Roadmap berikutnya
+## Roadmap
 
-Prioritas lanjutan yang paling logis:
-
-1. Dependency realism yang lebih kuat: multi-predecessor, logic validation, holiday/date-aware scheduling
-2. Import Primavera P6 / MS Project tahap awal
+1. Dependency realism yang lebih kuat, termasuk multi-predecessor dan validasi logic yang lebih kaya
+2. Import awal dari Primavera P6 atau MS Project
 3. Report export yang lebih kaya dengan lampiran chart per scenario
-4. Portfolio view dan collaboration setelah local-first workflow matang
+4. Portfolio view dan fitur collaboration setelah workflow local-first matang
